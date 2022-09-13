@@ -1,77 +1,64 @@
 import React, { useState, useEffect } from "react";
+import { ChakraProvider, Spinner } from "@chakra-ui/react";
 import axios from "axios";
-import {
-  BsSun,
-  BsClouds,
-  BsCloudRainHeavy,
-  BsCloudDrizzle,
-  BsCloudLightningRain,
-  BsCloudHaze1,
-  BsCloudSnow,
-  BsCloudRain,
-  BsSearch,
-  BsThermometer,
-  BsWind,
-  BsWater,
-} from "react-icons/bs";
 
-import { WiCelsius } from "react-icons/wi";
-import { ImSpinner } from "react-icons/im";
+import WeatherCard from "./components/WeatherCard";
+import SearchLocation from "./components/SearchLocation";
 
 const APIkey = "ba9ffd6504670d9dba36185f9703fc5f";
 
 function App() {
-  const [data, setData] = useState(null);
   const [location, setLocation] = useState("New York");
+  const [lat, setLat] = useState(40.7128);
+  const [lon, setLon] = useState(-74.0059);
+  const [inputValue, setInputValue] = useState("");
+  const [currentData, setCurrentData] = useState(null);
+
+  const handleInput = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    if (inputValue !== "") {
+      setLocation(inputValue);
+    }
+    e.preventDefault();
+  };
 
   useEffect(() => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${APIkey}`;
+    const locationUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${APIkey}`;
 
-    axios.get(url).then((res) => {
-      setData(res.data);
+    axios.get(locationUrl).then((res) => {
+      setLat(res.data[0].lat);
+      setLon(res.data[0].lon);
+      setLocation(res.data[0].name);
     });
   }, [location]);
 
-  if (!data) {
-    return <div>no data</div>;
-  }
+  useEffect(() => {
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${APIkey}`;
 
-  let icon;
+    axios.get(currentWeatherUrl).then((res) => {
+      setCurrentData(res.data);
+    });
+  }, [lat, lon]);
 
-  switch (data.weather[0].main) {
-    case "Clouds":
-      icon = <BsClouds />;
-      break;
-    case "Haze":
-      icon = <BsCloudHaze1 />;
-      break;
-    case "Rain":
-      icon = <BsCloudRainHeavy />;
-      break;
-    case "Clear":
-      icon = <BsSun />;
-      break;
-    case "Drizzle":
-      icon = <BsCloudDrizzle />;
-      break;
-    case "Snow":
-      icon = <BsCloudSnow />;
-      break;
-    case "Thunderstorm":
-      icon = <BsCloudLightningRain />;
-      break;
-    case "Mist":
-      icon = <BsCloudRain />;
-      break;
+  if (!currentData) {
+    return (
+      <>
+        <Spinner />
+      </>
+    );
   }
 
   return (
-    <>
-      <h1>weather app</h1>
-      <div>{icon}</div>
-      {/* form */}
-      {/* card */}
-    </>
+    <ChakraProvider>
+      <>
+        <h1>weather app</h1>
+        <SearchLocation handleInput={handleInput} handleSubmit={handleSubmit} />
+        <WeatherCard currentData={currentData} location={location} />
+      </>
+    </ChakraProvider>
   );
 }
 
