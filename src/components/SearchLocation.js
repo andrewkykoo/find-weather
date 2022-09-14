@@ -1,23 +1,31 @@
 import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Input,
+  Box,
   Button,
+  FormControl,
+  FormHelperText,
+  HStack,
+  Input,
 } from "@chakra-ui/react";
 
 function SearchLocation({ handleInput, handleSubmit }) {
   return (
-    <>
+    <Box m={5}>
       <FormControl>
-        <FormLabel>City</FormLabel>
-        <Input type="text" onChange={(e) => handleInput(e)} />
+        <HStack>
+          <Input
+            htmlSize={20}
+            width="auto"
+            type="text"
+            placeholder="New York"
+            onChange={(e) => handleInput(e)}
+          />
+          <Button type="submit" onClick={(e) => handleSubmit(e)}>
+            Submit
+          </Button>
+        </HStack>
         <FormHelperText>E.g., New York, Berlin, Paris</FormHelperText>
-        <Button type="submit" onClick={(e) => handleSubmit(e)}>
-          Submit
-        </Button>
       </FormControl>
-    </>
+    </Box>
   );
 }
 

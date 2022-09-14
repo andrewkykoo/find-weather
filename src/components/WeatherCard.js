@@ -3,7 +3,6 @@ import {
   HStack,
   Stat,
   StatGroup,
-  StatHelpText,
   StatLabel,
   StatNumber,
 } from "@chakra-ui/react";
@@ -56,20 +55,37 @@ function WeatherCard({ currentData, location }) {
       icon = null;
   }
   return (
-    <>
+    <Box m={5}>
       <StatGroup>
         <Stat>
-          <StatLabel>{location}</StatLabel>
+          <StatLabel fontSize="4xl" fontWeight="extrabold">
+            {location}
+          </StatLabel>
           <StatNumber>
             <HStack>
-              <Box>{Math.round(1.8 * (currentData.main.temp - 273) + 32)}</Box>
-              <TbTemperatureFahrenheit />
+              <Box fontSize="2xl">{currentData.weather[0].main}</Box>
+              <Box>{icon}</Box>
             </HStack>
+            <HStack>
+              <Box fontSize="2xl">
+                {Math.round(1.8 * (currentData.main.temp - 273) + 32)}
+              </Box>
+              <TbTemperatureFahrenheit size={15} />
+            </HStack>
+            <Box fontSize="sm">
+              Feels like:{" "}
+              {Math.round(1.8 * (currentData.main.feels_like - 273) + 32)}
+            </Box>
+            <Box fontSize="sm">
+              Low: {Math.round(1.8 * (currentData.main.temp_min - 273) + 32)}
+            </Box>
+            <Box fontSize="sm">
+              High: {Math.round(1.8 * (currentData.main.temp_max - 273) + 32)}
+            </Box>
           </StatNumber>
-          <StatHelpText>{icon}</StatHelpText>
         </Stat>
       </StatGroup>
-    </>
+    </Box>
   );
 }
 

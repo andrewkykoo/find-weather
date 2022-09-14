@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { ChakraProvider, Spinner } from "@chakra-ui/react";
+import {
+  ChakraProvider,
+  Spinner,
+  Heading,
+  Text,
+  Box,
+  Center,
+  HStack,
+  VStack,
+} from "@chakra-ui/react";
 import axios from "axios";
 
 import WeatherCard from "./components/WeatherCard";
@@ -12,6 +21,7 @@ function App() {
   const [lat, setLat] = useState(40.7128);
   const [lon, setLon] = useState(-74.0059);
   const [inputValue, setInputValue] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [currentData, setCurrentData] = useState(null);
 
   const handleInput = (e) => {
@@ -28,25 +38,36 @@ function App() {
   useEffect(() => {
     const locationUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${APIkey}`;
 
-    axios.get(locationUrl).then((res) => {
-      setLat(res.data[0].lat);
-      setLon(res.data[0].lon);
-      setLocation(res.data[0].name);
-    });
+    axios
+      .get(locationUrl)
+      .then((res) => {
+        setLat(res.data[0].lat);
+        setLon(res.data[0].lon);
+        setLocation(res.data[0].name);
+        setErrorMsg("");
+      })
+      .catch((err) => {
+        setErrorMsg(err);
+      });
   }, [location]);
 
   useEffect(() => {
     const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${APIkey}`;
 
-    axios.get(currentWeatherUrl).then((res) => {
-      setCurrentData(res.data);
-    });
+    axios
+      .get(currentWeatherUrl)
+      .then((res) => {
+        setCurrentData(res.data);
+      })
+      .catch((err) => {
+        setErrorMsg(err);
+      });
   }, [lat, lon]);
 
   if (!currentData) {
     return (
       <>
-        <Spinner />
+        <Text>Under maintenance.. Please come back later.</Text>
       </>
     );
   }
@@ -54,9 +75,31 @@ function App() {
   return (
     <ChakraProvider>
       <>
-        <h1>weather app</h1>
-        <SearchLocation handleInput={handleInput} handleSubmit={handleSubmit} />
-        <WeatherCard currentData={currentData} location={location} />
+        <Center>
+          <VStack>
+            <Heading m={5}>Find Weather</Heading>
+            <SearchLocation
+              handleInput={handleInput}
+              handleSubmit={handleSubmit}
+              errorMsg={errorMsg}
+            />
+            {!errorMsg ? (
+              <WeatherCard currentData={currentData} location={location} />
+            ) : (
+              <Box>
+                <HStack>
+                  <Spinner
+                    thickness="2px"
+                    speed="0.9s"
+                    emptyColor="gray.200"
+                    color="blue.500"
+                  />
+                  <Text>Please enter a valid city!</Text>
+                </HStack>
+              </Box>
+            )}
+          </VStack>
+        </Center>
       </>
     </ChakraProvider>
   );
